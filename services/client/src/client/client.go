@@ -97,11 +97,6 @@ func (client *Client) Run() error {
 			return err
 		}
 
-		if _, err := outputFile.WriteString(scanner.Text() + "\n"); err != nil { //Agregar condicion (? -> escritos == 0 ||
-			logger.Error("write-response", logger.Fail, messageArgs...)
-			return err
-		}
-
 		if string(responseBuffer) != clientMessage {
 			logger.Error("check-response", logger.Fail, messageArgs...)
 			return err
