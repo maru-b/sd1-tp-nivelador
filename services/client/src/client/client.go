@@ -1,10 +1,10 @@
 package client
 
 import (
-	"net"
-	"time"
-	"os"
 	"bufio"
+	"net"
+	"os"
+	"time"
 
 	"github.com/7574-sistemas-distribuidos/tp-nivelador/src/logger"
 	"github.com/7574-sistemas-distribuidos/tp-nivelador/src/safe_socket"
@@ -22,7 +22,7 @@ type ClientConfig struct {
 	ServerPort string
 	AgencyId   string
 	InputFile  string
-	OutputFile  string
+	OutputFile string
 }
 
 type Client struct {
@@ -66,15 +66,15 @@ func (client *Client) Run() error {
 	const mainAction = "test-echo-server"
 	defer client.conn.Close()
 
-	inputFile, err := os.Open(client.config.InputFile);
+	inputFile, err := os.Open(client.config.InputFile)
 	defer inputFile.Close()
 
-	if  err != nil {
+	if err != nil {
 		logger.Error("open-input-file", logger.Fail)
 		return err
 	}
 
-	outputFile, err := os.Create(client.config.OutputFile);
+	outputFile, err := os.Create(client.config.OutputFile)
 	defer outputFile.Close()
 
 	scanner := bufio.NewScanner(inputFile)
@@ -97,13 +97,18 @@ func (client *Client) Run() error {
 			return err
 		}
 
-		if escritos, err := outputFile.WriteString(scanner.Text() + "\n"); err != nil { //Agregar condicion (? -> escritos == 0 ||
+		if _, err := outputFile.WriteString(scanner.Text() + "\n"); err != nil { //Agregar condicion (? -> escritos == 0 ||
 			logger.Error("write-response", logger.Fail, messageArgs...)
 			return err
 		}
 
-		if string(responseBuffer) == clientMessage {
+		if string(responseBuffer) != clientMessage {
 			logger.Error("check-response", logger.Fail, messageArgs...)
+			return err
+		}
+
+		if _, err := outputFile.WriteString(scanner.Text() + "\n"); err != nil { //Agregar condicion (? -> escritos == 0 ||
+			logger.Error("write-response", logger.Fail, messageArgs...)
 			return err
 		}
 
