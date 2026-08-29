@@ -15,7 +15,7 @@ func SendAll(socket io.Writer, bytes []byte) error {
 		n, err := socket.Write(bytes[written:])
 		written += n
 
-		if err == io.ErrShortWrite && MAX_ATTEMPTS > 0 {
+		if err == io.ErrShortWrite && MAX_ATTEMPTS > 0 { // Es considerado valido que no se hayan escrito bytes?
 			// Buscar otros posibles errores que puedan necesitar volver a intentar
 			// o en qué casos sería válido reintentar
 			attempts -= 1
