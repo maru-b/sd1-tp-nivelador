@@ -67,14 +67,20 @@ func (client *Client) Run() error {
 	defer client.conn.Close()
 
 	inputFile, err := os.Open(client.config.InputFile)
-	defer inputFile.Close()
 
 	if err != nil {
 		logger.Error("open-input-file", logger.Fail)
 		return err
 	}
+	defer inputFile.Close()
 
 	outputFile, err := os.Create(client.config.OutputFile)
+
+	if err != nil {
+		logger.Error("open-output-file", logger.Fail)
+		return err
+	}
+
 	defer outputFile.Close()
 
 	scanner := bufio.NewScanner(inputFile)
@@ -86,12 +92,18 @@ func (client *Client) Run() error {
 
 		clientMessage := scanner.Text()
 
+		if err := scanner.Err(); err != nil {
+			logger.Error("read-input", logger.Fail, messageArgs...)
+			return err
+		}
+
 		if err := safe_socket.SendAll(client.conn, []byte(clientMessage)); err != nil {
 			logger.Error("send-message", logger.Fail, messageArgs...)
 			return err
 		}
 
-		responseBuffer, err := safe_socket.RecvAll(client.conn, ECHO_CLIENT_BUFFER_SIZE)
+		responseBuffer, err := safe_socket.RecvAll(client.conn, len(clientMessage))
+
 		if err != nil {
 			logger.Error("recv-response", logger.Fail, messageArgs...)
 			return err
